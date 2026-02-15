@@ -151,5 +151,8 @@ pyrightconfig.json
 .history
 .ionide
 
+
+#Other files
+~/cred.txt
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,python
 
