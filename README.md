@@ -2,6 +2,12 @@
 
 Context Engine is a PDF Q&A assistant with citations. It ingests PDFs into Pinecone, extracts text with PyMuPDF, and answers questions via a FastAPI backend and a static HTML frontend.
 
+
+<img width="1408" height="768" alt="conteng" src="https://github.com/user-attachments/assets/03342150-8034-44a1-890d-4270743500d8" />
+
+**Based on Packt's book "Context Engineering for Multi-Agent Systems" by Denis Rothman.**
+
+
 ## Features
 
 - PDF upload + ingestion into a knowledge store (Pinecone)
