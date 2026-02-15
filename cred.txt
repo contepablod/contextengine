@@ -1,0 +1,2 @@
+username: admin
+password: cE7ZOTc3UHFnWsgIQEpY9g

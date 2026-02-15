@@ -1,0 +1,30 @@
+[project]
+name = "contextengine"
+version = "0.1.0"
+description = "Context Engine backend for PDF Q&A with citations."
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "pydantic",
+  "tenacity",
+  "openai",
+  "pinecone",
+  "tiktoken",
+  "python-dotenv",
+  "requests",
+  "PyMuPDF",
+  "python-multipart",
+  "prometheus-client",
+  "opentelemetry-api",
+  "opentelemetry-sdk",
+  "opentelemetry-exporter-otlp-proto-http",
+  "opentelemetry-instrumentation-fastapi",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0",
+  "pytest-cov",
+  "pytest-asyncio",
+]

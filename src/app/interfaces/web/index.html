@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Context Engine - AI Document Assistant</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+
+</head>
+<body>
+  <div id="loginScreen" class="auth-screen no-print">
+    <div class="card auth-card">
+      <h2 style="margin-bottom: 8px;">Sign in</h2>
+      <p class="muted" style="margin-top: 0;">Enter your credentials to access the Context Engine.</p>
+      <label style="display: block; margin-bottom: 8px; margin-top: 16px;">Username</label>
+      <div class="row">
+        <input id="loginUsername" type="text" class="full-width" placeholder="Username" autocomplete="username" />
+      </div>
+      <label style="display: block; margin-bottom: 8px; margin-top: 8px;">Password</label>
+      <div class="row">
+        <input id="loginPassword" type="password" class="full-width" placeholder="Password" autocomplete="current-password" />
+      </div>
+      <div class="auth-actions">
+        <button id="loginBtn" class="btn-primary" style="flex: 1;">
+          <span class="icon">🔐</span> Login
+        </button>
+      </div>
+      <div id="loginMessage" style="display: none; margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <div id="appRoot">
+    <header class="no-print">
+      <div class="logo">📄</div>
+      <h1>Context Engine</h1>
+      <p class="subtitle">AI-Powered PDF Assistant with Intelligent Question Answering</p>
+      <div class="header-actions">
+        <button id="logoutBtn" class="btn-secondary tiny-btn">Logout</button>
+      </div>
+    </header>
+
+  <div class="app-layout no-print">
+    <aside class="nav-panel no-print">
+      <h3>Sections</h3>
+      <a href="#how-it-works" data-section="how-it-works">How It Works</a>
+      <a href="#knowledge-store" data-section="knowledge-store">Knowledge Store</a>
+      <a href="#context-library" data-section="context-library">Context Library</a>
+      <a href="#ask-questions" data-section="ask-questions">Ask Questions</a>
+    </aside>
+    <main class="main-content">
+      <div class="large-container no-print stagger-1" id="how-it-works">
+    <h2><span class="icon">🧭</span> How It Works</h2>
+    <div class="info-box">
+      Context Engine is a multi-agent PDF analysis pipeline. It extracts text, chunks it,
+      retrieves evidence from Pinecone, and produces cited answers using specialized agents.
+    </div>
+    <div class="hero-visual">
+      <img src="/static/images/conteng.png" alt="Context Engine system flow" loading="lazy" />
+      <div class="hero-caption">System flow overview for the Context Engine pipeline.</div>
+    </div>
+    <div class="row" style="align-items: flex-start;">
+      <ol style="margin: 0; padding-left: 20px; flex: 1;">
+        <li><strong>Extract</strong>: All PDFs are extracted with PyMuPDF and lightweight layout heuristics.</li>
+        <li><strong>Chunk</strong>: Text is split into overlapping chunks with section/page metadata.</li>
+        <li><strong>Embed</strong>: Each chunk is embedded and stored in Pinecone (knowledge namespace).</li>
+        <li><strong>Context</strong>: Reusable notes are stored in a context namespace and filtered by type.</li>
+        <li><strong>Retrieve</strong>: Researcher fetches top‑k chunks (hybrid dense + BM25 when enabled).</li>
+        <li><strong>Compose</strong>: Writer produces the answer with inline citations like [e1].</li>
+        <li><strong>Verify</strong>: Verifier checks the draft against evidence for consistency.</li>
+      </ol>
+      <div class="upload-result" style="flex: 1;">
+        <div class="upload-row">
+          <div class="upload-label">Tip</div>
+          <div>Use the doc selector to switch active PDFs before asking questions.</div>
+        </div>
+        <div class="upload-row">
+          <div class="upload-label">Citations</div>
+          <div>Citations map to evidence IDs (e1, e2, …) shown below.</div>
+        </div>
+        <div class="upload-row">
+          <div class="upload-label">Filters</div>
+          <div>Limit retrieval by section or page to focus answers.</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top: 18px;">
+      <strong>Agents involved</strong>
+      <ul style="margin: 10px 0 0; padding-left: 18px;">
+        <li>Librarian builds the response blueprint from stored context.</li>
+        <li>Researcher retrieves evidence chunks and scores.</li>
+        <li>Writer drafts the final answer with citations.</li>
+        <li>Summarizer compresses long drafts when needed.</li>
+        <li>Verifier cross-checks the draft against evidence and flags unsupported claims.</li>
+      </ul>
+    </div>
+    <blockquote style="margin-top: 16px;">
+      Based on Packt's book "Context Engineering for Multi-Agent Systems" by Denis Rothman.
+    </blockquote>
+  </div>
+
+  <div class="large-container no-print stagger-2">
+    <h2><span class="icon">🧠</span> Models in Use</h2>
+    <div id="modelsPanel" class="upload-result">
+      <div class="muted">Loading model configuration…</div>
+    </div>
+  </div>
+
+      <div class="large-container no-print stagger-2" id="knowledge-store">
+        <h2><span class="icon">📥</span> Knowledge Store</h2>
+        <div class="card">
+      <label style="display: block; margin-bottom: 12px; margin-top: 16px;">PDF Document</label>
+      <div id="dropZone" class="drop-zone">
+        <div>Drop PDF here</div>
+        <div id="dropZoneMeta" class="drop-zone-meta">or click to browse</div>
+      </div>
+      <input id="file" type="file" accept="application/pdf" class="file-input" />
+
+      <div class="row" style="margin-top: 16px; gap: 8px;">
+        <button id="uploadBtn" class="btn-primary" style="flex: 1;">
+          <span class="icon">📤</span> Upload PDF
+        </button>
+        <button id="resetKnowledgeBtn" class="btn-secondary">
+          <span class="icon">🧹</span> Reset Knowledge
+        </button>
+      </div>
+
+      <div id="uploadProgress" class="progress-steps">
+        <span class="progress-step" data-step="upload">Upload</span>
+        <span class="progress-step" data-step="extract">Extract</span>
+        <span class="progress-step" data-step="embed">Embed</span>
+        <span class="progress-step" data-step="ready">Ready</span>
+      </div>
+      <div id="uploadBar" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="uploadBarFill" class="progress-bar-fill"></div>
+      </div>
+      <span id="uploadBarLabel" class="progress-bar-label"></span>
+
+      <div id="uploadMessage" style="display: none;"></div>
+
+      <div style="margin-top: 16px;">
+        <span class="muted">Document ID:</span>
+        <span class="badge badge-primary" id="docId">Not uploaded</span>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <label style="display: block; margin-bottom: 8px;">Uploaded documents</label>
+        <div id="docList" class="doc-list">
+          <div class="muted">No documents yet</div>
+        </div>
+      </div>
+
+          <div id="uploadOut" class="upload-result" style="display:none; margin-top: 16px;"></div>
+        </div>
+      </div>
+
+      <div class="large-container no-print stagger-2" id="context-library">
+        <h2><span class="icon">🧩</span> Context Library</h2>
+        <div class="card">
+      <label style="display: block; margin-bottom: 12px; margin-top: 16px;">Context Blueprints</label>
+      <div class="row">
+        <input id="blueprintId" type="text" class="full-width" placeholder="Blueprint id (e.g., blueprint_executive_brief)" />
+      </div>
+      <div class="row">
+        <textarea id="blueprintDesc" class="full-width" rows="3" placeholder="Short description (this is what gets embedded)..."></textarea>
+      </div>
+      <div class="row">
+        <textarea id="blueprintJson" class="full-width code-input" rows="7" placeholder='Paste blueprint JSON, or a full object like {"id":"...","description":"...","blueprint":{...}}'></textarea>
+      </div>
+      <span class="muted">Blueprints are embedded by description; JSON should be an object.</span>
+
+      <div class="row" style="margin-top: 12px; gap: 8px;">
+        <button id="saveBlueprintBtn" class="btn-secondary">
+          <span class="icon">🧩</span> Save Blueprint
+        </button>
+        <button id="clearBlueprintBtn" class="btn-secondary">
+          <span class="icon">🧹</span> Clear
+        </button>
+        <button id="resetContextBtn" class="btn-secondary">
+          <span class="icon">🧽</span> Reset Context
+        </button>
+      </div>
+
+      <div id="blueprintMessage" style="display: none; margin-top: 12px;"></div>
+
+          <div style="margin-top: 12px;">
+            <label style="display: block; margin-bottom: 8px;">Stored blueprints</label>
+            <div id="blueprintList" class="context-list">
+              <div class="muted">No blueprints yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="large-container no-print stagger-2" id="ask-questions">
+        <h2><span class="icon">❓</span> Ask Questions</h2>
+        <div class="card">
+      <div style="margin-top: 12px;">
+        <label style="display: block; margin-bottom: 8px;">Select uploaded document</label>
+        <select id="docSelect" class="full-width">
+          <option value="">No documents yet</option>
+        </select>
+      </div>
+
+      <label style="display: block; margin-top: 12px; margin-bottom: 12px;">Your Question</label>
+      <div class="row">
+        <input id="question" type="text" placeholder="What are the main conclusions?" class="full-width" />
+      </div>
+      <span class="muted">Type a question about your PDF document</span>
+
+      <div style="margin-top: 12px;">
+        <label style="display: block; margin-bottom: 8px;">Active context type</label>
+        <select id="ctxFilterSelect" class="full-width"></select>
+        <span class="muted">Choose the active context used for answers</span>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <label style="display: block; margin-bottom: 8px;">Suggested questions</label>
+        <div id="suggestions" class="suggestions">
+          <button class="btn-secondary tiny-btn">Summarize the document</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top: 16px; gap: 8px;">
+        <button id="askBtn" class="btn-primary" style="flex: 1;" disabled>
+          <span class="icon">🔍</span> Ask
+        </button>
+        <button id="summaryBtn" class="btn-secondary" disabled>
+          <span class="icon">📋</span> Summary
+        </button>
+      </div>
+
+          <div id="askMessage" style="margin-top: 16px; display: none;"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="large-container stagger-3">
+    <h2><span class="icon">💡</span> Answer</h2>
+    <div id="answer" class="answer-content">—</div>
+    <div class="answer-actions no-print">
+      <button id="exportMarkdownBtn" class="btn-secondary">Download Markdown</button>
+      <button id="printAnswerBtn" class="btn-secondary">Print / Save PDF</button>
+    </div>
+    <div id="citations" class="citations-section" style="display: none;">
+      <h3><span class="icon">📚</span> Citations</h3>
+      <div id="citations-list"></div>
+    </div>
+  </div>
+
+  <div class="large-container no-print stagger-3">
+    <h2><span class="icon">📎</span> Supporting Evidence</h2>
+    <div class="evidence">
+      <div id="evidence">—</div>
+    </div>
+  </div>
+
+  <footer class="no-print">
+    <p>Context Engine v2.0 • Built with ❤️ for intelligent document analysis</p>
+  </footer>
+  </div>
+
+    <script src="/static/app.js"></script>
+
+</body>
+</html>
