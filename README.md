@@ -30,7 +30,7 @@ Context Engine is a PDF Q&A assistant with citations. It ingests PDFs into Pinec
 - Python 3.12 (3.10+ likely OK)
 - Pinecone index + API key
 - OpenAI-compatible embeddings API (default uses OpenRouter base URL)
-No external PDF extraction service is required.
+  No external PDF extraction service is required.
 
 ## Setup
 
@@ -162,26 +162,3 @@ See `tests/README.md` for test commands and structure.
 - Tracing is enabled when `ENABLE_TRACING=true` with an OTLP endpoint.
 - System metrics (CPU/memory/network) are collected by node-exporter in the observability stack.
 - AI metrics are exposed as `llm_*` (latency, errors, tokens) and vector DB metrics as `vector_db_*`.
-
-## Auth
-
-Auth is a single-user login backed by a PBKDF2 hash stored in `.env`.
-
-- `ENABLE_AUTH=true`
-- `AUTH_USERNAME` sets the login username.
-- `AUTH_PASSWORD_HASH` stores the PBKDF2 hash in the format `pbkdf2_sha256$iterations$salt$hash`.
-
-Generate a secure password hash:
-
-```bash
-python3 - <<'PY'
-import base64, hashlib, secrets
-password = secrets.token_urlsafe(16)
-iterations = 200_000
-salt = secrets.token_bytes(16)
-dk = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, iterations)
-enc = lambda b: base64.urlsafe_b64encode(b).decode('ascii').rstrip('=')
-print("Password:", password)
-print("AUTH_PASSWORD_HASH=pbkdf2_sha256$%d$%s$%s" % (iterations, enc(salt), enc(dk)))
-PY
-```
