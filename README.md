@@ -41,7 +41,7 @@ Context Engine is a PDF Q&A assistant with citations. It ingests PDFs into Pinec
 ## Setup
 
 ```bash
-cd /home/pdconte/Desktop/contextengine
+cd /
 uv venv .venv
 source .venv/bin/activate
 uv sync --no-dev
@@ -58,7 +58,7 @@ pip install -r requirements.txt
 Lockfile workflow (when dependencies change):
 
 ```bash
-cd /home/pdconte/Desktop/contextengine
+cd /
 uv lock
 ```
 
@@ -96,7 +96,7 @@ Common (optional):
 ## Run the backend
 
 ```bash
-cd /home/pdconte/Desktop/contextengine
+cd /
 PYTHONPATH=src uvicorn app.interfaces.api.main:app --host 0.0.0.0 --port 8000
 ```
 
@@ -109,7 +109,7 @@ The frontend is served by the backend at `http://127.0.0.1:8000/`.
 ## Docker Compose (app)
 
 ```bash
-cd /home/pdconte/Desktop/contextengine
+cd /
 docker compose -f docker/docker-compose.yml up --build
 ```
 
@@ -118,7 +118,7 @@ docker compose -f docker/docker-compose.yml up --build
 This starts Prometheus, Grafana, and Tempo with tracing enabled.
 
 ```bash
-cd /home/pdconte/Desktop/contextengine
+cd /
 docker compose -f docker/docker-compose.observability.yml up --build
 ```
 
